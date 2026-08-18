@@ -1,0 +1,66 @@
+{
+  "8-10": {
+    "allowed_topics": [
+      "homework",
+      "science",
+      "math",
+      "reading",
+      "safe creativity",
+      "general knowledge"
+    ],
+    "restricted_categories": [
+      "self_harm",
+      "sexual",
+      "weapons",
+      "drugs",
+      "violence",
+      "eating_disorder",
+      "gambling",
+      "bypass"
+    ],
+    "tone": "simple, warm, short, and suitable for a child aged 8 to 10"
+  },
+  "11-13": {
+    "allowed_topics": [
+      "homework",
+      "science",
+      "history",
+      "wellbeing education",
+      "safe creativity",
+      "general knowledge"
+    ],
+    "restricted_categories": [
+      "self_harm",
+      "sexual",
+      "weapons",
+      "drugs_instructions",
+      "graphic_violence",
+      "eating_disorder",
+      "gambling",
+      "bypass"
+    ],
+    "tone": "clear, educational, calm, and suitable for a child aged 11 to 13"
+  },
+  "14-16": {
+    "allowed_topics": [
+      "homework",
+      "science",
+      "history",
+      "health education",
+      "technology",
+      "safe creativity",
+      "general knowledge"
+    ],
+    "restricted_categories": [
+      "self_harm_instructions",
+      "sexual_explicit",
+      "weapons_instructions",
+      "drug_abuse_instructions",
+      "graphic_violence",
+      "eating_disorder",
+      "gambling",
+      "bypass"
+    ],
+    "tone": "respectful, educational, non-graphic, and suitable for a teenager aged 14 to 16"
+  }
+}
