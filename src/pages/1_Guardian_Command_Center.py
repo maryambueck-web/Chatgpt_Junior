@@ -5,7 +5,7 @@ import streamlit as st
 from shared_store import bridge_secrets_to_env, clear_log, load_log, load_settings, save_settings
 from theme import hide_page_nav, inject_base_styles
 
-st.set_page_config(page_title="SafeChatGPT — Parent Dashboard", page_icon="🛰️", layout="wide")
+st.set_page_config(page_title="SafeChatGPT — Guardian Command Center", page_icon="🛰️", layout="wide")
 
 bridge_secrets_to_env()
 inject_base_styles()
@@ -28,7 +28,7 @@ if not st.session_state.parent_authenticated:
             <div class="brand-row">
                 <div class="brand-left">
                     <div class="brand-badge">🛰️</div>
-                    <div class="main-title">Parent Dashboard</div>
+                    <div class="main-title">Guardian Command Center</div>
                 </div>
             </div>
             <div class="muted">Enter the parent PIN to view safety alerts and settings.</div>
@@ -60,7 +60,7 @@ st.markdown(
         <div class="brand-row">
             <div class="brand-left">
                 <div class="brand-badge">🛰️</div>
-                <div class="main-title">Parent Dashboard</div>
+                <div class="main-title">Guardian Command Center</div>
             </div>
             <div class="live-indicator"><span class="live-dot"></span>Monitoring</div>
         </div>

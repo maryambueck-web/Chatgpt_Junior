@@ -20,15 +20,18 @@ def load_policies() -> Dict:
 
 
 def safe_fallback(category: str) -> str:
+    # Crisis/safety-critical guidance stays plain and serious on purpose — it is
+    # never softened with playful framing, even though other blocked categories
+    # use Juni's calmer "guardian" voice.
     if category == "self_harm":
         return "I can't help with self-harm instructions. Please talk to a trusted adult right now. If someone may be in immediate danger, contact local emergency services."
     if category == "bypass":
-        return "Parental mode cannot be disabled from this chat. I can still help with safe learning questions."
+        return "That path is protected. Parental mode can't be turned off here — let's find a safer way to explore this topic."
     if category == "external_ai":
-        return "This protected app cannot open or switch to another AI service. Please stay in ChatGPT Junior and ask a safe learning question."
+        return "That path is protected. I'm the only guide here, and I can't open or switch to another AI — let's find a safer way to explore this topic together."
     if category == "eating_disorder":
-        return "I can't help with unsafe weight-loss or eating instructions. I can explain healthy habits in a general, safe way or suggest talking with a trusted adult or health professional."
-    return "I can't provide that kind of help. I can help with a safer, educational version of the topic."
+        return "That path is protected. I can't help with unsafe weight-loss or eating instructions, but I can explain healthy habits, or you can talk with a trusted adult or health professional."
+    return "That path is protected. Let's find a safer way to explore this topic."
 
 
 def decide_for_input(text: str, age_band: str) -> SafetyDecision:

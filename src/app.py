@@ -12,28 +12,39 @@ hide_page_nav()
 
 age_band = load_settings()["age_band"]
 
-st.markdown(
-    """
-    <div class="hero-card">
-        <div class="brand-row">
-            <div class="brand-left">
-                <div class="brand-badge">🛡️</div>
-                <div class="main-title">SafeChatGPT</div>
+if "stars" not in st.session_state:
+    st.session_state.stars = 0
+
+hero_placeholder = st.empty()
+
+
+def render_hero() -> None:
+    hero_placeholder.markdown(
+        f"""
+        <div class="hero-card">
+            <div class="brand-row">
+                <div class="brand-left">
+                    <div class="brand-badge">🛡️</div>
+                    <div class="main-title">SafeChatGPT</div>
+                </div>
+                <div class="live-indicator"><span class="live-dot"></span>System active</div>
             </div>
-            <div class="live-indicator"><span class="live-dot"></span>System active</div>
+            <div class="muted">
+                A protected ChatGPT experience for children when the official website is blocked by parents.
+            </div>
+            <div class="status-row">
+                <span class="status-pill success">✅ Safety filter active</span>
+                <span class="status-pill">🧠 Age-aware moderation</span>
+                <span class="status-pill">🔒 Parent-controlled access</span>
+                <span class="status-pill" style="background:rgba(246,201,69,.12);border-color:rgba(246,201,69,.30);color:#ffe9ad;">⭐ Knowledge stars: {st.session_state.stars}</span>
+            </div>
         </div>
-        <div class="muted">
-            A protected ChatGPT experience for children when the official website is blocked by parents.
-        </div>
-        <div class="status-row">
-            <span class="status-pill success">✅ Safety filter active</span>
-            <span class="status-pill">🧠 Age-aware moderation</span>
-            <span class="status-pill">🔒 Parent-controlled access</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+render_hero()
 
 st.markdown(
     """
@@ -48,6 +59,10 @@ st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if not st.session_state.messages:
+    with st.chat_message("assistant"):
+        st.write("Hi! I'm Juni, your learning guardian. What would you like to discover today?")
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
@@ -84,6 +99,8 @@ if user_message:
             ])
         else:
             final_answer = draft_answer
+            st.session_state.stars += 1
+            render_hero()
 
     with st.chat_message("assistant"):
         st.write(final_answer)

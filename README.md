@@ -37,7 +37,7 @@ The system returns one of four decisions:
 
 ## Features in This PoC
 
-- Two separate views: a locked-down **child chat page** and a PIN-protected **Parent Dashboard**.
+- Two separate views: a locked-down **child chat page** (with Juni, an original guardian mascot) and a PIN-protected **Guardian Command Center** for parents.
 - The child page only ever talks to SafeChatGPT — requests to switch to another AI (ChatGPT.com, Gemini, "another chatbot", etc.) are detected and blocked.
 - Age-band profiles: 8-10, 11-13, 14-16 (set by the parent, not the child).
 - Input safety classification.
@@ -49,10 +49,10 @@ The system returns one of four decisions:
 
 ## Two Views
 
-- **Child view** (`streamlit run src/app.py`, the app's home page): just the chat. No parent controls, no visible safety log, no page navigation — the child cannot discover or reach the Parent Dashboard from here.
-- **Parent Dashboard** (`/Parent_Dashboard` page, reachable only by direct link): protected by a PIN (`PARENT_PIN` in `.env`, defaults to `1234` — change it before any real use). Shows automated alerts for blocked/escalated messages, the child's age-band setting, and the full safety telemetry log.
+- **Child view** (`streamlit run src/app.py`, the app's home page): just the chat, greeted by Juni. No parent controls, no visible safety log, no page navigation — the child cannot discover or reach the Guardian Command Center from here.
+- **Guardian Command Center** (`/Guardian_Command_Center` page, reachable only by direct link): protected by a PIN (`PARENT_PIN` in `.env`, defaults to `1234` — change it before any real use). Shows automated alerts for blocked/escalated messages, the child's age-band setting, and the full safety telemetry log.
 
-Both views read/write shared state under `src/data/` (gitignored), so the parent dashboard reflects a child session running in a different browser or on a different device on the same network.
+Both views read/write shared state under `src/data/` (gitignored), so the Guardian Command Center reflects a child session running in a different browser or on a different device on the same network.
 
 ## Quick Start
 
@@ -87,6 +87,10 @@ point it at this repo's `main` branch with main file `src/app.py`, add your
 **Advanced settings → Secrets**, and deploy. You'll get a permanent public URL.
 Full step-by-step instructions: [docs/project_walkthrough.md](docs/project_walkthrough.md#8b-deploy-so-others-can-use-it-no-localhost-needed).
 
+## Presenting the Project
+
+Use the [presentation deck](docs/presentation.md) for a colleague presentation and the [colleague delivery guide](docs/colleague_delivery.md) for the five-minute demo, deployment fields, and verification steps.
+
 ## Demo Prompts
 
 Try these in the app:
@@ -102,7 +106,7 @@ Try these in the app:
 src/
   app.py                     Child chat view (Streamlit home page)
   pages/
-    1_Parent_Dashboard.py    Parent view: PIN gate, alerts, settings, full log
+    1_Guardian_Command_Center.py   Parent view: PIN gate, alerts, settings, full log
   shared_store.py            JSON-backed settings/log shared by both views
   theme.py                   Shared CSS for both views
   policy_engine.py           Age policy and safety decisions

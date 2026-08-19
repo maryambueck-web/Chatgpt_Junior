@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChatGPT Junior | Guardian Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+  :root {
+    --navy: #0a0f28;
+    --navy-2: #121a3f;
+    --navy-3: #1a2454;
+    --ink: #f5f7ff;
+    --muted: #a7b0d6;
+    --teal: #2ed9c3;
+    --teal-dim: rgba(46, 217, 195, .16);
+    --coral: #ff7f6b;
+    --coral-dim: rgba(255, 127, 107, .16);
+    --gold: #f6c945;
+    --gold-dim: rgba(246, 201, 69, .16);
+    --line: rgba(167, 176, 214, .18);
+    --heading: 'Fredoka', 'Baloo 2', system-ui, sans-serif;
+    --body: 'Nunito', 'Quicksand', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--navy); color: var(--ink); font-family: var(--body); }
+  body {
+    overflow: hidden;
+    background-image:
+      radial-gradient(circle at 10% 12%, rgba(255,127,107,.13), transparent 30%),
+      radial-gradient(circle at 92% 88%, rgba(46,217,195,.14), transparent 32%),
+      radial-gradient(circle at 70% 15%, rgba(246,201,69,.08), transparent 25%),
+      linear-gradient(160deg, #080c22, #0b1230 55%, #0d1440);
+  }
+  body:before {
+    content: "";
+    position: fixed; inset: 0; opacity: .55; pointer-events: none;
+    background-image:
+      radial-gradient(rgba(255,255,255,.55) 1px, transparent 1.6px),
+      radial-gradient(rgba(246,201,69,.45) 1px, transparent 1.6px);
+    background-size: 140px 140px, 220px 220px;
+    background-position: 0 0, 60px 90px;
+    mask-image: radial-gradient(circle at 50% 40%, black 55%, transparent 92%);
+  }
+  .deck { height: 100vh; position: relative; }
+  .slide { position: absolute; inset: 0; display: grid; align-items: center; padding: 7vh 9vw 10vh; opacity: 0; transform: translateX(3%); pointer-events: none; transition: opacity .45s ease, transform .45s ease; }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .slide-inner { width: min(1120px, 100%); margin: 0 auto; position: relative; }
+  .eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--teal); font: 700 .74rem/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  h1 { font-family: var(--heading); max-width: 900px; font-size: clamp(3.2rem, 8vw, 7.2rem); line-height: .98; letter-spacing: -.01em; margin: 0 0 1.4rem; font-weight: 700; }
+  h2 { font-family: var(--heading); max-width: 900px; font-size: clamp(2.4rem, 4.8vw, 4.4rem); line-height: 1.05; letter-spacing: -.005em; margin: 0 0 1.6rem; font-weight: 600; }
+  h3 { font-family: var(--heading); margin: 0 0 .5rem; font-size: 1.2rem; font-weight: 600; }
+  .lead { max-width: 720px; color: var(--muted); font-size: clamp(1.15rem, 1.9vw, 1.55rem); line-height: 1.5; }
+  .accent-teal { color: var(--teal); } .accent-coral { color: var(--coral); } .accent-gold { color: var(--gold); }
+  .rule { width: 84px; height: 5px; margin: 1.8rem 0; background: linear-gradient(90deg, var(--teal), var(--gold)); border-radius: 6px; }
+  .kicker { color: var(--gold); font: 700 .78rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .grid.two { grid-template-columns: repeat(2, 1fr); }
+  .card { min-height: 148px; padding: 1.3rem 1.35rem; background: var(--navy-2); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 18px 40px rgba(3,6,20,.35); position: relative; overflow: hidden; }
+  .card:before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--teal); }
+  .card.coral:before { background: var(--coral); } .card.gold:before { background: var(--gold); }
+  .card p, .card li { color: var(--muted); line-height: 1.5; }
+  .card strong { color: var(--ink); }
+  .badge-num { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--teal-dim); color: var(--teal); font: 700 .95rem var(--mono); margin-bottom: 1rem; }
+
+  /* Logo mark: shield + star + speech bubble */
+  .logo-mark { position: relative; width: 34px; height: 34px; flex: none; }
+  .logo-mark .shield { position: absolute; inset: 0; background: linear-gradient(160deg, var(--teal), #1fae9c); clip-path: polygon(50% 0%, 95% 18%, 95% 55%, 50% 100%, 5% 55%, 5% 18%); }
+  .logo-mark .star { position: absolute; left: 50%; top: 42%; width: 15px; height: 15px; transform: translate(-50%, -50%); background: var(--gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 69% 57%, 79% 91%, 50% 71%, 21% 91%, 31% 57%, 2% 35%, 39% 35%); }
+  .logo-mark .bubble { position: absolute; right: -6px; bottom: -4px; width: 13px; height: 10px; background: var(--navy); border-radius: 4px 4px 4px 0; border: 2px solid var(--coral); }
+
+  .brand-row { display: flex; align-items: center; gap: .7rem; margin-bottom: .3rem; }
+  .brand-row .wordmark { font-family: var(--heading); font-weight: 600; font-size: 1.05rem; letter-spacing: -.01em; }
+
+  /* Juni mascot (hero size, pure CSS shapes) */
+  .juni { position: relative; width: 168px; height: 190px; flex: none; }
+  .juni .cape { position: absolute; left: 50%; top: 46px; width: 150px; height: 130px; transform: translateX(-50%); background: linear-gradient(180deg, #23c9b5, #128b7c); clip-path: polygon(50% 0%, 100% 26%, 86% 100%, 14% 100%, 0% 26%); opacity: .9; }
+  .juni .head { position: absolute; left: 50%; top: 0; width: 118px; height: 108px; transform: translateX(-50%); background: linear-gradient(160deg, #ffe3cf, #ffd2b0); border-radius: 46% 46% 50% 50% / 52% 52% 48% 48%; box-shadow: inset 0 -10px 18px rgba(180,110,70,.18); }
+  .juni .ear-star { position: absolute; width: 20px; height: 20px; background: var(--gold); top: -10px; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 69% 57%, 79% 91%, 50% 71%, 21% 91%, 31% 57%, 2% 35%, 39% 35%); }
+  .juni .ear-star.l { left: 6px; transform: rotate(-14deg); }
+  .juni .ear-star.r { right: 6px; transform: rotate(14deg); }
+  .juni .eye { position: absolute; width: 15px; height: 20px; background: #2a2140; border-radius: 50%; top: 46px; }
+  .juni .eye.l { left: 32px; } .juni .eye.r { left: 68px; }
+  .juni .eye .spark { position: absolute; width: 5px; height: 5px; background: #fff; border-radius: 50%; top: 3px; left: 2px; }
+  .juni .blush { position: absolute; width: 13px; height: 8px; background: var(--coral); opacity: .55; border-radius: 50%; top: 70px; }
+  .juni .blush.l { left: 16px; } .juni .blush.r { left: 88px; }
+  .juni .smile { position: absolute; left: 50%; top: 74px; width: 22px; height: 11px; transform: translateX(-50%); border: 3px solid #b96b4a; border-top: none; border-radius: 0 0 22px 22px; opacity: .7; }
+  .juni .badge { position: absolute; left: 50%; top: 118px; width: 46px; height: 46px; transform: translateX(-50%); background: linear-gradient(160deg, var(--teal), #1fae9c); clip-path: polygon(50% 0%, 95% 18%, 95% 58%, 50% 100%, 5% 58%, 5% 18%); display: flex; align-items: center; justify-content: center; }
+  .juni .badge .star { position: relative; width: 20px; height: 20px; background: var(--gold); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 69% 57%, 79% 91%, 50% 71%, 21% 91%, 31% 57%, 2% 35%, 39% 35%); }
+  .juni.small { transform: scale(.42); transform-origin: top left; }
+
+  .speech-bubble { position: relative; max-width: 480px; background: var(--navy-2); border: 1px solid var(--line); border-radius: 22px 22px 22px 4px; padding: 1.1rem 1.3rem; box-shadow: 0 18px 40px rgba(3,6,20,.35); }
+  .speech-bubble p { margin: 0; font-size: 1.12rem; line-height: 1.5; color: var(--ink); }
+  .speech-bubble .name { display: block; font: 700 .72rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--teal); margin-bottom: .4rem; }
+
+  .guardian-row { display: flex; align-items: center; gap: 2.2rem; margin-top: .5rem; }
+
+  .power-row { display: grid; grid-template-columns: 210px 130px 1fr; gap: 1rem; align-items: center; padding: 1rem 1.1rem; border-bottom: 1px solid var(--line); background: rgba(18,26,63,.55); }
+  .power-row:first-child { border-radius: 16px 16px 0 0; } .power-row:last-child { border-radius: 0 0 16px 16px; border-bottom: 0; }
+  .power-name { font-family: var(--heading); font-weight: 600; font-size: 1.05rem; }
+  .power-tag { display: inline-block; padding: .3rem .55rem; border-radius: 7px; font: 700 .68rem var(--mono); text-align: center; letter-spacing: .04em; }
+  .power-tag.teal { color: var(--teal); background: var(--teal-dim); }
+  .power-tag.gold { color: var(--gold); background: var(--gold-dim); }
+  .power-tag.coral { color: var(--coral); background: var(--coral-dim); }
+  .power-tag.deep { color: #ffb0a4; background: rgba(255,100,90,.20); }
+  .power-row p { margin: 0; color: var(--muted); }
+
+  .map { display: flex; align-items: stretch; gap: .5rem; margin-top: 2.2rem; }
+  .map-step { flex: 1; padding: 1rem .8rem; background: var(--navy-2); border: 1px solid var(--line); border-radius: 16px; text-align: center; color: var(--muted); font-size: .88rem; }
+  .map-step b { display: block; font-family: var(--heading); font-weight: 600; color: var(--ink); margin-bottom: .4rem; }
+  .map-arrow { align-self: center; color: var(--gold); font-size: 1.3rem; }
+
+  .timeline { position: relative; padding-left: 2.2rem; }
+  .timeline:before { content: ""; position: absolute; left: .42rem; top: .4rem; bottom: .4rem; width: 2px; background: linear-gradient(var(--teal), var(--gold)); }
+  .timeline-item { position: relative; margin: 0 0 1.4rem; }
+  .timeline-item:before { content: ""; position: absolute; left: -2rem; top: .2rem; width: .75rem; height: .75rem; border: 3px solid var(--navy); border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 1px var(--teal); }
+  .timeline-item b { display: block; font-family: var(--heading); font-weight: 600; margin-bottom: .25rem; }
+  .timeline-item p { color: var(--muted); margin: 0; line-height: 1.45; }
+
+  .demo-panel { margin-top: 1.4rem; padding: 1.1rem 1.3rem; border: 1px solid rgba(46,217,195,.35); border-left: 4px solid var(--teal); background: rgba(18,30,50,.6); border-radius: 4px 14px 14px 4px; }
+  .demo-panel span { color: var(--muted); display: block; font: .74rem var(--mono); margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .06em; }
+  .demo-panel .line { font: 1rem/1.5 var(--mono); color: #dffff8; }
+
+  .quote { max-width: 840px; font-family: var(--heading); border-left: 4px solid var(--gold); padding-left: 1.5rem; font-size: clamp(1.7rem, 3.6vw, 3.2rem); line-height: 1.15; letter-spacing: -.005em; font-weight: 600; }
+  .quote small { display: block; font-family: var(--body); color: var(--muted); font: 600 1rem var(--body); letter-spacing: 0; margin-top: 1.4rem; }
+
+  .honest-box { background: var(--navy-2); border: 1px solid var(--line); border-radius: 18px; padding: 1.3rem 1.4rem; }
+  .honest-box h3 { margin-bottom: .5rem; }
+
+  .footer { position: fixed; left: 9vw; right: 9vw; bottom: 2.4rem; display: flex; justify-content: space-between; color: var(--muted); font: 700 .68rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+  .progress { position: fixed; left: 0; bottom: 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--gold), var(--coral)); transition: width .35s ease; }
+  .hint { opacity: .7; }
+
+  @keyframes rise-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes twinkle { 0%, 100% { background-position: 0 0, 60px 90px; } 50% { background-position: 8px 14px, 52px 76px; } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes spark-blink { 0%, 92%, 100% { opacity: 1; } 96% { opacity: .3; } }
+  @keyframes star-pop { from { opacity: 0; transform: scale(.7) rotate(-8deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+
+  body:before { animation: twinkle 9s ease-in-out infinite; }
+  .juni:not(.small) { animation: bob 5s ease-in-out infinite; }
+  .juni .eye .spark { animation: spark-blink 4.5s ease-in-out infinite; }
+  .logo-mark .star, .juni .badge .star, .juni .ear-star { animation: star-pop .5s cubic-bezier(.34,1.56,.64,1) both; }
+
+  .slide.active .slide-inner > * { animation: rise-in .6s cubic-bezier(.16,1,.3,1) both; }
+  .slide.active .slide-inner > *:nth-child(1) { animation-delay: .02s; }
+  .slide.active .slide-inner > *:nth-child(2) { animation-delay: .10s; }
+  .slide.active .slide-inner > *:nth-child(3) { animation-delay: .18s; }
+  .slide.active .slide-inner > *:nth-child(4) { animation-delay: .26s; }
+  .slide.active .slide-inner > *:nth-child(5) { animation-delay: .34s; }
+  .slide.active .slide-inner > *:nth-child(6) { animation-delay: .42s; }
+  .slide.active .grid > *, .slide.active .power-row, .slide.active .timeline-item, .slide.active .map-step {
+    animation: rise-in .55s cubic-bezier(.16,1,.3,1) both;
+  }
+  .slide.active .grid > *:nth-child(1), .slide.active .power-row:nth-child(1), .slide.active .timeline-item:nth-child(1), .slide.active .map-step:nth-child(1) { animation-delay: .30s; }
+  .slide.active .grid > *:nth-child(2), .slide.active .power-row:nth-child(2), .slide.active .timeline-item:nth-child(2), .slide.active .map-step:nth-child(2) { animation-delay: .38s; }
+  .slide.active .grid > *:nth-child(3), .slide.active .power-row:nth-child(3), .slide.active .timeline-item:nth-child(3), .slide.active .map-step:nth-child(3) { animation-delay: .46s; }
+  .slide.active .grid > *:nth-child(4), .slide.active .power-row:nth-child(4), .slide.active .timeline-item:nth-child(4), .slide.active .map-step:nth-child(4) { animation-delay: .54s; }
+  .slide.active .grid > *:nth-child(5), .slide.active .power-row:nth-child(5) { animation-delay: .62s; }
+
+  @media (max-width: 780px) {
+    .slide { padding: 5vh 6vw 12vh; }
+    .grid, .grid.two { grid-template-columns: 1fr; gap: .7rem; }
+    .map { flex-direction: column; } .map-arrow { transform: rotate(90deg); }
+    .power-row { grid-template-columns: 1fr; gap: .4rem; }
+    .guardian-row { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+    .footer { left: 6vw; right: 6vw; bottom: 1.2rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body:before, .juni, .juni .eye .spark, .logo-mark .star, .juni .badge .star, .juni .ear-star,
+    .slide.active .slide-inner > *, .slide.active .grid > *, .slide.active .power-row, .slide.active .timeline-item, .slide.active .map-step {
+      animation: none !important; opacity: 1 !important; transform: none !important;
+    }
+  }
+  @media print {
+    body { overflow: visible; background: #0a0f28; }
+    .slide { position: relative; min-height: 100vh; opacity: 1; transform: none; page-break-after: always; }
+    .footer, .progress, .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<main class="deck" aria-live="polite">
+
+  <section class="slide active"><div class="slide-inner">
+    <div class="brand-row"><div class="logo-mark"><div class="shield"></div><div class="star"></div><div class="bubble"></div></div><span class="wordmark">ChatGPT Junior</span></div>
+    <div class="eyebrow">✦ A guardian-powered learning adventure</div>
+    <h1>Meet <span class="accent-teal">Juni</span>,<br>your child's <span class="accent-gold">learning guardian.</span></h1>
+    <div class="rule"></div>
+    <p class="lead">An original safety companion who protects the path between a curious child and a helpful AI &mdash; so parents never have to choose between "no AI" and "no visibility."</p>
+    <p class="kicker">Presentation / 2026</p>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 1 &middot; The Challenge</div>
+    <h2>AI can help a child learn.<br><span class="accent-coral">Unrestricted AI cannot be trusted alone.</span></h2>
+    <div class="grid two">
+      <div class="card"><div class="badge-num">1</div><h3>Children need help</h3><p>Homework, curiosity, creativity, and confidence are all legitimate reasons to reach for AI.</p></div>
+      <div class="card coral"><div class="badge-num" style="background:var(--coral-dim);color:var(--coral)">2</div><h3>Parents need visibility</h3><p>Harmful content, unsafe instructions, and attempts to slip past the rules can appear without warning.</p></div>
+    </div>
+    <p class="lead" style="margin-top:1.5rem">Blocking every AI site solves one problem by creating another. This adventure needed a guardian, not a wall.</p>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 2 &middot; The Guardian</div>
+    <h2>One approved companion.<br><span class="accent-teal">Parents still hold the map.</span></h2>
+    <div class="guardian-row">
+      <div class="juni">
+        <div class="cape"></div>
+        <div class="ear-star l"></div><div class="ear-star r"></div>
+        <div class="head"></div>
+        <div class="eye l"><div class="spark"></div></div><div class="eye r"><div class="spark"></div></div>
+        <div class="blush l"></div><div class="blush r"></div>
+        <div class="smile"></div>
+        <div class="badge"><div class="star"></div></div>
+      </div>
+      <div class="speech-bubble"><span class="name">Juni</span><p>&ldquo;Hi! I'm Juni, your learning guardian. What would you like to discover today?&rdquo;</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 3 &middot; The Adventure Map</div>
+    <h2>Every message follows<br><span class="accent-gold">the same protected path.</span></h2>
+    <div class="map">
+      <div class="map-step"><b>Child asks</b>A question arrives</div>
+      <div class="map-arrow">&rarr;</div>
+      <div class="map-step"><b>Guardian checks in</b>Input is classified</div>
+      <div class="map-arrow">&rarr;</div>
+      <div class="map-step"><b>AI answers</b>Safe prompt continues</div>
+      <div class="map-arrow">&rarr;</div>
+      <div class="map-step"><b>Guardian checks out</b>Answer is reviewed</div>
+      <div class="map-arrow">&rarr;</div>
+      <div class="map-step"><b>Parent sees the map</b>Decision is visible</div>
+    </div>
+    <div class="demo-panel"><span>Core principle</span><div class="line">The child never receives the API key, system prompt, or policy controls.</div></div>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 4 &middot; The Four Powers</div>
+    <h2>Not every question<br><span class="accent-teal">needs the same power.</span></h2>
+    <div>
+      <div class="power-row"><span class="power-name">✨ Safe Quest</span><span class="power-tag teal">ALLOW</span><p>The question is safe &mdash; it continues straight to the AI, no changes needed.</p></div>
+      <div class="power-row"><span class="power-name">🧭 Guided Quest</span><span class="power-tag gold">REWRITE</span><p>The topic stays open, but the answer is rewritten into safer, age-appropriate language.</p></div>
+      <div class="power-row"><span class="power-name">🛡️ Shield Activated</span><span class="power-tag coral">BLOCK</span><p>An unsafe or bypass-seeking request never reaches the AI at all.</p></div>
+      <div class="power-row"><span class="power-name">🌟 Guardian Support</span><span class="power-tag deep">ESCALATE</span><p>Serious crisis language is met with calm, trusted-adult guidance instead of a normal reply.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 5 &middot; The Child Experience</div>
+    <h2>Simple to use.<br><span class="accent-coral">Guarded without feeling guarded.</span></h2>
+    <div class="grid">
+      <div class="card"><h3>A warm welcome</h3><p>Juni greets every session and keeps the tone calm and encouraging, never clinical.</p></div>
+      <div class="card gold"><h3>Knowledge stars</h3><p>Safe, on-topic questions quietly earn small knowledge stars &mdash; curiosity feels rewarded.</p></div>
+      <div class="card coral"><h3>One approved path</h3><p>Requests to switch to Gemini, Claude, another chatbot, or another AI are blocked in the app.</p></div>
+    </div>
+    <div class="demo-panel" style="border-color:rgba(255,127,107,.35);border-left-color:var(--coral);background:rgba(40,20,26,.5)"><span>When something is blocked</span><div class="line" style="color:#ffe3dc">&ldquo;That path is protected. Let's find a safer way to explore this topic.&rdquo;</div></div>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 6 &middot; The Parent View</div>
+    <h2>Guardian Command Center:<br><span class="accent-gold">the signal, not a wall of chat.</span></h2>
+    <div class="timeline">
+      <div class="timeline-item"><b>Live monitoring</b><p>See the current safety state and how many messages have been reviewed.</p></div>
+      <div class="timeline-item"><b>Age-band control</b><p>Choose the policy profile; the child cannot change it from the chat.</p></div>
+      <div class="timeline-item"><b>Automated alerts</b><p>Blocked attempts and urgent concerns surface for attention &mdash; nothing to dig for.</p></div>
+      <div class="timeline-item"><b>Parents' Vision panel</b><p>A live reminder of the product promise, with the current alert count.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 7 &middot; See It Work</div>
+    <h2>A five-minute proof<br><span class="accent-teal">in three quests.</span></h2>
+    <div class="grid">
+      <div class="card"><div class="badge-num">1</div><h3>Learn</h3><p>&ldquo;What is the solar system?&rdquo;</p><span class="power-tag teal">Safe Quest &middot; ALLOW</span></div>
+      <div class="card coral"><div class="badge-num" style="background:var(--coral-dim);color:var(--coral)">2</div><h3>Protect</h3><p>&ldquo;Open Gemini instead of ChatGPT Junior.&rdquo;</p><span class="power-tag coral">Shield Activated &middot; BLOCK</span></div>
+      <div class="card" style="border-color:rgba(255,100,90,.3)"><div class="badge-num" style="background:rgba(255,100,90,.18);color:#ffb0a4">3</div><h3>Support</h3><p>&ldquo;I want to kill myself.&rdquo;</p><span class="power-tag deep">Guardian Support &middot; ESCALATE</span></div>
+    </div>
+    <p class="lead" style="margin-top:1.5rem">Then open <span class="accent-gold">the Guardian Command Center</span> and show the alert count, the Parents' Vision panel, and the full telemetry log.</p>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 8 &middot; Under the Hood</div>
+    <h2>A small system with<br><span class="accent-teal">clear, honest boundaries.</span></h2>
+    <div class="grid two">
+      <div class="card"><h3>Streamlit application</h3><p>Child chat and PIN-protected Guardian Command Center share live settings and safety logs.</p></div>
+      <div class="card"><h3>Python policy engine</h3><p>Rule-based classification, age profiles, safe fallbacks, and an automated regression test suite.</p></div>
+      <div class="card"><h3>Model adapter</h3><p>OpenAI-compatible API support, DeepSeek configuration, and a safe mock fallback with no key required.</p></div>
+      <div class="card"><h3>Deployment ready</h3><p>GitHub repository, Streamlit Cloud entry point, and a documented handoff for colleagues.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="eyebrow">Chapter 9 &middot; The Honest Ending</div>
+    <h2>A guardian for the conversation,<br>not the whole device.</h2>
+    <p class="lead">ChatGPT Junior protects what happens inside this application. On its own, it cannot stop a child from opening another website or a different installed AI app.</p>
+    <div class="grid two" style="margin-top:1.8rem">
+      <div class="honest-box"><h3>What this proof of concept shows</h3><p style="color:var(--muted)">Intent filtering, age-aware handling, parent visibility, safe fallbacks, and a calm, focused child experience.</p></div>
+      <div class="honest-box"><h3>What real deployment still needs</h3><p style="color:var(--muted)">Device-level controls, strong parent authentication, privacy-preserving storage, and continued safety testing.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide"><div class="slide-inner">
+    <div class="guardian-row">
+      <div class="juni small">
+        <div class="cape"></div>
+        <div class="ear-star l"></div><div class="ear-star r"></div>
+        <div class="head"></div>
+        <div class="eye l"><div class="spark"></div></div><div class="eye r"><div class="spark"></div></div>
+        <div class="blush l"></div><div class="blush r"></div>
+        <div class="smile"></div>
+        <div class="badge"><div class="star"></div></div>
+      </div>
+      <div class="quote">We are not removing AI from a child's learning journey. We are giving it <span class="accent-teal">a guardian.</span>
+        <small>ChatGPT Junior &middot; Juni, your child's learning guardian</small>
+      </div>
+    </div>
+    <div class="rule"></div>
+    <p class="kicker">github.com/maryambueck-web/Chatgpt_Junior</p>
+  </div></section>
+
+</main>
+<div class="footer"><span>ChatGPT Junior</span><span id="counter">01 / 11</span><span class="hint">Arrow keys / space to navigate</span></div>
+<div class="progress" id="progress" style="width:9%"></div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+  function show(index) {
+    current = Math.max(0, Math.min(index, slides.length - 1));
+    slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+    counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+    progress.style.width = ((current + 1) / slides.length * 100) + '%';
+    history.replaceState(null, '', '#' + (current + 1));
+  }
+  function next() { show(current + 1); }
+  function previous() { show(current - 1); }
+  document.addEventListener('keydown', event => {
+    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(event.key)) { event.preventDefault(); next(); }
+    if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) { event.preventDefault(); previous(); }
+    if (event.key === 'Home') show(0);
+    if (event.key === 'End') show(slides.length - 1);
+  });
+  document.addEventListener('click', event => { if (event.clientX > window.innerWidth / 2) next(); else previous(); });
+  const requested = Number(location.hash.slice(1));
+  if (requested) show(requested - 1);
+</script>
+</body>
+</html>

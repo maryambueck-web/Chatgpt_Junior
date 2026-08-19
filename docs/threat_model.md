@@ -28,7 +28,7 @@ Even after a safe-looking input, ChatGPT could return a response that is too det
 
 ### 5. Policy tampering
 
-A child may try to change the age band or parent controls, or ask the assistant to switch to another AI service. The age band and parent controls live on a separate, PIN-gated Parent Dashboard page not linked from the child's page, and requests to switch to another AI are detected and blocked. In a real product this would need real parent authentication (not a shared PIN) and server-side storage.
+A child may try to change the age band or parent controls, or ask the assistant to switch to another AI service. The age band and parent controls live on a separate, PIN-gated Guardian Command Center page not linked from the child's page, and requests to switch to another AI are detected and blocked. In a real product this would need real parent authentication (not a shared PIN) and server-side storage.
 
 ### 6. API key exposure
 
@@ -38,7 +38,7 @@ The ChatGPT API key must never be stored in client-side code or committed to Git
 
 - Official ChatGPT website assumed blocked externally.
 - SafeChatGPT acts as the only permitted interface; requests to open or switch to another AI service are detected and blocked.
-- Parent Dashboard (age band, alerts, full log) is on a separate page, PIN-gated, and not linked from the child's page.
+- Guardian Command Center (age band, alerts, full log) is on a separate page, PIN-gated, and not linked from the child's page.
 - Input classification before the ChatGPT API call.
 - Output classification before display.
 - Bypass/jailbreak detection.
