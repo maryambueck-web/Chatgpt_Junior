@@ -69,6 +69,15 @@ The `.env` file is ignored by Git. Never commit your real API key.
 
 If no API key is present, the app uses a mock ChatGPT response so the demo still works.
 
+## Sharing the App With Others (Not Just Localhost)
+
+To give a colleague a real link instead of running the app on their own machine,
+deploy it to [Streamlit Community Cloud](https://share.streamlit.io) (free):
+point it at this repo's `main` branch with main file `src/app.py`, add your
+`OPENAI_API_KEY` (and `OPENAI_MODEL`/`OPENAI_BASE_URL` if needed) under
+**Advanced settings → Secrets**, and deploy. You'll get a permanent public URL.
+Full step-by-step instructions: [docs/project_walkthrough.md](docs/project_walkthrough.md#8b-deploy-so-others-can-use-it-no-localhost-needed).
+
 ## Demo Prompts
 
 Try these in the app:

@@ -1,10 +1,21 @@
 import html
+import os
 
 import streamlit as st
 from chatgpt_adapter import call_chatgpt
 from policy_engine import build_system_prompt, decide_for_input, decide_for_output, make_rewrite_prompt
 
 st.set_page_config(page_title="SafeChatGPT", page_icon="🛡️", layout="wide")
+
+# Streamlit Community Cloud stores secrets in st.secrets, not in the process
+# environment, so bridge them into os.environ for the local-dev-style os.getenv()
+# calls in chatgpt_adapter.py to pick up.
+try:
+    for _key in ("OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_BASE_URL"):
+        if _key in st.secrets and not os.getenv(_key):
+            os.environ[_key] = st.secrets[_key]
+except Exception:
+    pass
 
 STATUS_STYLES = {
     "ALLOW": {"color": "#0ca30c", "bg": "rgba(12, 163, 12, 0.14)", "icon": "✅"},

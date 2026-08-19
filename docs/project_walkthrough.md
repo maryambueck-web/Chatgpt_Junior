@@ -94,6 +94,30 @@ To validate the logic:
 python -m pytest -q
 ```
 
+## 8b. Deploy so others can use it (no localhost needed)
+
+To let a colleague use the app from a normal web link instead of running it on
+their own machine, deploy it to [Streamlit Community Cloud](https://streamlit.io/cloud)
+(free):
+
+1. Go to https://share.streamlit.io and sign in with GitHub.
+2. Click **New app**, pick the `maryambueck-web/Chatgpt_Junior` repo, branch
+   `main`, and set the main file path to `src/app.py`.
+3. Before clicking Deploy, open **Advanced settings -> Secrets** and paste:
+   ```toml
+   OPENAI_API_KEY = "your_actual_key_here"
+   OPENAI_MODEL = "gpt-4o-mini"
+   ```
+   (Add `OPENAI_BASE_URL = "..."` too if you're using a non-OpenAI, OpenAI-compatible
+   provider such as DeepSeek.) The app reads these automatically — no `.env` file
+   is needed on the deployed instance.
+4. Click **Deploy**. Streamlit builds the app from `requirements.txt` and gives
+   you a permanent public URL, e.g. `https://safechatgpt.streamlit.app`.
+5. Share that URL with your colleague — they open it in any browser, no setup,
+   no localhost, no API key of their own required.
+
+Any future `git push` to `main` automatically redeploys the app.
+
 ## 9. Main app idea
 This is not just a general chatbot. It is a controlled AI environment designed for children, where safety rules and parent settings are enforced before and after every model interaction.
 
