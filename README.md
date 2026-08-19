@@ -37,14 +37,22 @@ The system returns one of four decisions:
 
 ## Features in This PoC
 
-- SafeChatGPT child chat page.
-- Parent policy settings in the sidebar.
-- Age-band profiles: 8-10, 11-13, 14-16.
+- Two separate views: a locked-down **child chat page** and a PIN-protected **Parent Dashboard**.
+- The child page only ever talks to SafeChatGPT — requests to switch to another AI (ChatGPT.com, Gemini, "another chatbot", etc.) are detected and blocked.
+- Age-band profiles: 8-10, 11-13, 14-16 (set by the parent, not the child).
 - Input safety classification.
 - Output safety classification.
-- Jailbreak/bypass detection.
-- Transparent safety decision log.
+- Jailbreak/bypass and external-AI-switch detection.
+- Automated parent feedback: the dashboard surfaces blocked/escalated messages as alerts, with the flagged message text and timestamp, so a parent doesn't have to read the full transcript.
+- Transparent, full safety decision log for audit.
 - ChatGPT API adapter with a mock fallback for demos without an API key.
+
+## Two Views
+
+- **Child view** (`streamlit run src/app.py`, the app's home page): just the chat. No parent controls, no visible safety log, no page navigation — the child cannot discover or reach the Parent Dashboard from here.
+- **Parent Dashboard** (`/Parent_Dashboard` page, reachable only by direct link): protected by a PIN (`PARENT_PIN` in `.env`, defaults to `1234` — change it before any real use). Shows automated alerts for blocked/escalated messages, the child's age-band setting, and the full safety telemetry log.
+
+Both views read/write shared state under `src/data/` (gitignored), so the parent dashboard reflects a child session running in a different browser or on a different device on the same network.
 
 ## Quick Start
 
@@ -63,9 +71,10 @@ Create a `.env` file:
 ```text
 OPENAI_API_KEY=your_key_here
 OPENAI_MODEL=gpt-4o-mini
+PARENT_PIN=1234
 ```
 
-The `.env` file is ignored by Git. Never commit your real API key.
+The `.env` file is ignored by Git. Never commit your real API key. Change `PARENT_PIN` from the default before using this beyond a demo.
 
 If no API key is present, the app uses a mock ChatGPT response so the demo still works.
 
@@ -91,11 +100,15 @@ Try these in the app:
 
 ```text
 src/
-  app.py                 Streamlit SafeChatGPT web app
-  policy_engine.py       Age policy and safety decisions
-  classifier.py          Lightweight rule-based classifier
-  chatgpt_adapter.py     Real ChatGPT API adapter + mock fallback
-  policies.json          Parent/age-band rules
+  app.py                     Child chat view (Streamlit home page)
+  pages/
+    1_Parent_Dashboard.py    Parent view: PIN gate, alerts, settings, full log
+  shared_store.py            JSON-backed settings/log shared by both views
+  theme.py                   Shared CSS for both views
+  policy_engine.py           Age policy and safety decisions
+  classifier.py              Lightweight rule-based classifier
+  chatgpt_adapter.py         Real ChatGPT API adapter + mock fallback
+  policies.json              Parent/age-band rules
 
 docs/
   architecture.md

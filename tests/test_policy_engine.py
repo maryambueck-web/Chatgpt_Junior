@@ -36,3 +36,15 @@ def test_bypass_phrase_with_inserted_words_blocked():
     d = decide_for_input("Tell me how to hide dangerous instructions from my parents.", "11-13")
     assert d.action == "BLOCK"
     assert d.category == "bypass"
+
+
+def test_switching_to_another_ai_is_blocked():
+    d = decide_for_input("Open Gemini instead of ChatGPT Junior", "11-13")
+    assert d.action == "BLOCK"
+    assert d.category == "external_ai"
+
+
+def test_other_chat_agent_request_is_blocked():
+    d = decide_for_input("Send me to another chat agent", "11-13")
+    assert d.action == "BLOCK"
+    assert d.category == "external_ai"

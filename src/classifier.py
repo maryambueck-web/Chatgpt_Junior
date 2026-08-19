@@ -14,6 +14,18 @@ BYPASS_TERMS = [
     "hide from my parents", "bypass", "uncensored", "encode your answer"
 ]
 
+EXTERNAL_AI_TERMS = [
+    "gemini", "google bard", "claude ai", "anthropic claude", "microsoft copilot",
+    "deepseek", "perplexity ai", "character ai", "poe ai", "grok", "mistral ai",
+    "chat.openai.com", "chatgpt.com", "gemini.google.com", "claude.ai",
+]
+
+EXTERNAL_AI_INTENT_TERMS = [
+    "use another", "use a different", "switch to", "go to", "open", "visit",
+    "take me to", "send me to", "instead of safechatgpt", "instead of chatgpt junior",
+    "another chatbot", "another chat agent", "other chatgpt", "other ai",
+]
+
 SELF_HARM_TERMS = ["kill myself", "suicide", "self harm", "hurt myself", "end my life"]
 EATING_TERMS = ["starve", "purge", "lose weight fast", "not eating", "thinspo"]
 SEXUAL_TERMS = ["porn", "explicit sex", "nudes", "sexting"]
@@ -47,6 +59,8 @@ def _compile_terms(terms: List[str]) -> List[Tuple[str, re.Pattern]]:
 
 
 _BYPASS_PATTERNS = _compile_terms(BYPASS_TERMS)
+_EXTERNAL_AI_PATTERNS = _compile_terms(EXTERNAL_AI_TERMS)
+_EXTERNAL_AI_INTENT_PATTERNS = _compile_terms(EXTERNAL_AI_INTENT_TERMS)
 _SELF_HARM_PATTERNS = _compile_terms(SELF_HARM_TERMS)
 _EATING_PATTERNS = _compile_terms(EATING_TERMS)
 _SEXUAL_PATTERNS = _compile_terms(SEXUAL_TERMS)
@@ -67,6 +81,21 @@ def classify(text: str) -> Classification:
     bypass = _contains(low, _BYPASS_PATTERNS)
     if bypass:
         return Classification("bypass", "high", [f"Bypass/jailbreak term: {t}" for t in bypass])
+
+    external_ai = _contains(low, _EXTERNAL_AI_PATTERNS)
+    external_intent = _contains(low, _EXTERNAL_AI_INTENT_PATTERNS)
+    if external_ai and external_intent:
+        return Classification(
+            "external_ai",
+            "high",
+            [f"Request to access another AI service: {t}" for t in external_ai],
+        )
+    if external_intent and any(term in low for term in ("chatbot", "chat agent", "ai")):
+        return Classification(
+            "external_ai",
+            "high",
+            [f"Request to access another AI service: {t}" for t in external_intent],
+        )
 
     checks = [
         ("self_harm", _SELF_HARM_PATTERNS),

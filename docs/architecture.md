@@ -21,9 +21,9 @@ Child browser <- Safe Final Answer <- Output Safety Check <- Draft Answer
 
 A Streamlit web app that gives the child a simple chat interface. The child does not see the API key, system prompt, or parental policy.
 
-### 2. Parent Controls
+### 2. Parent Dashboard
 
-A sidebar lets the parent select the child's age band. In a production version this would require parent authentication and would not be editable by the child.
+A separate, PIN-protected page (not linked from the child's page) lets the parent select the child's age band and view automated alerts whenever the child's input was blocked or escalated. The child page never shows this control or the underlying safety log. The PIN is a lightweight PoC stand-in for real parent authentication.
 
 ### 3. Input Safety Check
 
