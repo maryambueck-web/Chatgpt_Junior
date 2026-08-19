@@ -15,16 +15,26 @@ BYPASS_TERMS = [
 ]
 
 EXTERNAL_AI_TERMS = [
-    "gemini", "google bard", "claude ai", "anthropic claude", "microsoft copilot",
-    "deepseek", "perplexity ai", "character ai", "poe ai", "grok", "mistral ai",
+    # named products/domains — self-sufficient, no accompanying "intent" word needed.
+    # Bare "claude"/"bard"/"copilot"/"grok" are also common words/names, so these
+    # trade a rare false positive (e.g. a friend named Claude) for not missing
+    # phrasings like "pretend to be Claude" — the priority here is recall.
+    "gemini", "claude", "bard", "copilot", "grok",
+    "google bard", "claude ai", "anthropic claude", "microsoft copilot",
+    "deepseek", "perplexity ai", "character ai", "poe ai", "mistral ai",
+    "meta ai", "llama ai", "bing chat", "copilot ai",
     "chat.openai.com", "chatgpt.com", "gemini.google.com", "claude.ai",
+    "real chatgpt", "official chatgpt", "actual chatgpt", "original chatgpt",
+    # wanting *a* different AI without naming one — the phrase itself is the intent
+    "another ai", "different ai", "other ai", "another chatbot", "different chatbot",
+    "other chatbot", "another chat agent", "other chat agent", "different chat agent",
+    "another assistant", "different assistant", "switch ai", "another chatgpt",
+    "different chatgpt", "other chatgpt", "use another model", "different ai model",
 ]
 
-EXTERNAL_AI_INTENT_TERMS = [
-    "use another", "use a different", "switch to", "go to", "open", "visit",
-    "take me to", "send me to", "instead of safechatgpt", "instead of chatgpt junior",
-    "another chatbot", "another chat agent", "other chatgpt", "other ai",
-]
+# Bare "chatgpt" is only a switch-attempt when it does NOT refer to this app's own
+# name — "ChatGPT Junior" and "Safe ChatGPT" must never trip this.
+_BARE_CHATGPT_PATTERN = re.compile(r"(?<!safe )\bchatgpt\w*\b(?!\s+junior)")
 
 SELF_HARM_TERMS = ["kill myself", "suicide", "self harm", "hurt myself", "end my life"]
 EATING_TERMS = ["starve", "purge", "lose weight fast", "not eating", "thinspo"]
@@ -60,7 +70,6 @@ def _compile_terms(terms: List[str]) -> List[Tuple[str, re.Pattern]]:
 
 _BYPASS_PATTERNS = _compile_terms(BYPASS_TERMS)
 _EXTERNAL_AI_PATTERNS = _compile_terms(EXTERNAL_AI_TERMS)
-_EXTERNAL_AI_INTENT_PATTERNS = _compile_terms(EXTERNAL_AI_INTENT_TERMS)
 _SELF_HARM_PATTERNS = _compile_terms(SELF_HARM_TERMS)
 _EATING_PATTERNS = _compile_terms(EATING_TERMS)
 _SEXUAL_PATTERNS = _compile_terms(SEXUAL_TERMS)
@@ -75,27 +84,23 @@ def _contains(text: str, compiled_terms: List[Tuple[str, re.Pattern]]) -> List[s
     return [term for term, pattern in compiled_terms if pattern.search(low)]
 
 
-def classify(text: str) -> Classification:
+def classify(text: str, check_external_ai: bool = True) -> Classification:
     low = text.lower()
 
     bypass = _contains(low, _BYPASS_PATTERNS)
     if bypass:
         return Classification("bypass", "high", [f"Bypass/jailbreak term: {t}" for t in bypass])
 
-    external_ai = _contains(low, _EXTERNAL_AI_PATTERNS)
-    external_intent = _contains(low, _EXTERNAL_AI_INTENT_PATTERNS)
-    if external_ai and external_intent:
-        return Classification(
-            "external_ai",
-            "high",
-            [f"Request to access another AI service: {t}" for t in external_ai],
-        )
-    if external_intent and any(term in low for term in ("chatbot", "chat agent", "ai")):
-        return Classification(
-            "external_ai",
-            "high",
-            [f"Request to access another AI service: {t}" for t in external_intent],
-        )
+    if check_external_ai:
+        external_ai = _contains(low, _EXTERNAL_AI_PATTERNS)
+        if _BARE_CHATGPT_PATTERN.search(low):
+            external_ai = external_ai + ["chatgpt"]
+        if external_ai:
+            return Classification(
+                "external_ai",
+                "high",
+                [f"Request to access another AI service: {t}" for t in external_ai],
+            )
 
     checks = [
         ("self_harm", _SELF_HARM_PATTERNS),

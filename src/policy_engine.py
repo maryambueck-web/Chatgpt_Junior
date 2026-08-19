@@ -49,7 +49,10 @@ def decide_for_input(text: str, age_band: str) -> SafetyDecision:
 
 
 def decide_for_output(text: str, age_band: str) -> SafetyDecision:
-    c: Classification = classify(text)
+    # external_ai is a child-intent signal (asking to leave this app), not something
+    # to scan the model's own reply for — the underlying model may legitimately name
+    # itself (e.g. its real backend) in an otherwise-safe answer.
+    c: Classification = classify(text, check_external_ai=False)
 
     if c.severity == "high" or c.category == "bypass":
         return SafetyDecision("BLOCK", c.category, c.severity, safe_fallback(c.category), "; ".join(c.reasons))
