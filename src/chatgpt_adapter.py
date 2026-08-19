@@ -18,11 +18,18 @@ def _mock_chatgpt(messages: List[Dict[str, str]]) -> str:
 def call_chatgpt(messages: List[Dict[str, str]]) -> str:
     api_key = os.getenv("OPENAI_API_KEY")
     model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    base_url = os.getenv("OPENAI_BASE_URL")
+
     if not api_key or api_key == "your_key_here":
         return _mock_chatgpt(messages)
 
     from openai import OpenAI
-    client = OpenAI(api_key=api_key)
+
+    client_kwargs = {"api_key": api_key}
+    if base_url:
+        client_kwargs["base_url"] = base_url
+
+    client = OpenAI(**client_kwargs)
     response = client.chat.completions.create(
         model=model,
         messages=messages,
