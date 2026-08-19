@@ -90,6 +90,26 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.markdown(
+    f"""
+    <div class="vision-card">
+        <div class="vision-heading">◉ Parents' Vision · Live Mode</div>
+        <div class="vision-title">Give your child the benefits of AI, with you still in control.</div>
+        <div class="vision-copy">
+            ChatGPT Junior is the approved learning space: helpful questions stay available,
+            unsafe requests are stopped, and the dashboard gives you live visibility without
+            requiring you to read every conversation.
+        </div>
+        <div class="vision-points">
+            <div class="vision-point">🛡️ Age-appropriate answers</div>
+            <div class="vision-point">🔒 Other AI-switch attempts blocked</div>
+            <div class="vision-point">📡 {len(block_entries) + len(escalate_entries)} live alert(s) for your attention</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.subheader("🔔 Automated Feedback")
 
 if not escalate_entries and not block_entries:

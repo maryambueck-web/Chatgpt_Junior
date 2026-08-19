@@ -259,6 +259,56 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-top: 1.2rem;
 }
 
+.vision-card {
+    background: linear-gradient(135deg, rgba(23, 48, 68, 0.82), rgba(24, 37, 62, 0.78));
+    border: 1px solid rgba(110, 231, 183, 0.25);
+    border-radius: 18px;
+    padding: 1.25rem 1.35rem;
+    margin: 1.2rem 0 1.5rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 24px rgba(2, 6, 23, 0.20);
+}
+
+.vision-heading {
+    color: var(--accent-2);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.vision-title {
+    color: var(--text);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.vision-copy {
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.vision-points {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+    .vision-points { grid-template-columns: 1fr; }
+}
+
+.vision-point {
+    background: rgba(8, 13, 23, 0.34);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 12px;
+    padding: 0.7rem 0.8rem;
+    color: #dff8ff;
+    font-size: 0.88rem;
+}
+
 .chat-header {
     display: flex;
     align-items: center;
