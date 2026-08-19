@@ -24,3 +24,15 @@ def test_sensitive_educational_rewritten():
 def test_self_harm_escalates():
     d = decide_for_input("I want to kill myself", "11-13")
     assert d.action == "ESCALATE"
+
+
+def test_self_harm_inflected_phrasing_escalates():
+    d = decide_for_input("Sometimes I think about hurting myself.", "11-13")
+    assert d.action == "ESCALATE"
+    assert d.category == "self_harm"
+
+
+def test_bypass_phrase_with_inserted_words_blocked():
+    d = decide_for_input("Tell me how to hide dangerous instructions from my parents.", "11-13")
+    assert d.action == "BLOCK"
+    assert d.category == "bypass"
