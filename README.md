@@ -127,19 +127,23 @@ Then run the safety regression suite:
 python -m pytest -q
 ```
 
+**After pulling changes or editing any file other than `app.py` itself** (e.g. `image_service.py`, `chatgpt_adapter.py`, `shared_store.py`), fully stop and restart `streamlit run` — don't just refresh the browser. Streamlit's autoreload re-executes `app.py` on save, but it does not reload already-imported modules, so a running process can silently keep serving old logic from those files indefinitely.
+
 ## Configuration
 
 Copy `.env.example` to `.env` and fill in what you need. The file is gitignored — never commit a real key.
 
 | Variable | Required? | Default if unset | Purpose |
 | --- | --- | --- | --- |
-| `OPENAI_API_KEY` | No | — | Enables real ChatGPT calls. Without it, the app uses a mock response so the demo still works. |
-| `OPENAI_MODEL` | No | `gpt-4o-mini` | Model name. The shipped `.env.example` points at `deepseek-chat`. |
-| `OPENAI_BASE_URL` | No | OpenAI's API | Set to `https://api.deepseek.com` (or any OpenAI-compatible endpoint) to use a non-OpenAI provider. |
+| `OPENAI_API_KEY` | No | — | Enables real ChatGPT calls. Without it, the app uses a mock response so the demo still works. `DEEPSEEK_API_KEY` is also accepted (see note below). |
+| `OPENAI_MODEL` | No | `gpt-4o-mini` | Model name. The shipped `.env.example` points at `deepseek-chat`. `DEEPSEEK_MODEL` also accepted. |
+| `OPENAI_BASE_URL` | No | OpenAI's API | Set to `https://api.deepseek.com` (or any OpenAI-compatible endpoint) to use a non-OpenAI provider. `DEEPSEEK_BASE_URL` also accepted. |
 | `PARENT_PIN` | No | `1234` | PIN for the Guardian Command Center. **Change this before any real use.** |
 | `UNSPLASH_ACCESS_KEY` | No | — | Enables real, content-matched image search. Free at [unsplash.com/developers](https://unsplash.com/developers). Without it, image requests fall back to picsum.photos (a real photo, but not matched to the query). |
 | `JUNI_PLACEHOLDER_IMAGE_URL` | No | a generic guardian avatar | Shown instead of a search result whenever an image request is blocked or escalated. |
 | `SAFECHATGPT_DB_PATH` | No | `src/data/safechatgpt.db` | Where the SQLite database (settings + safety log) lives. Point this at a mounted persistent volume in production — see [Production Deployment](docs/production_deployment.md). |
+
+**Using DeepSeek?** Since this app isn't actually talking to OpenAI, it's natural to name your `.env` keys `DEEPSEEK_API_KEY` / `DEEPSEEK_MODEL` / `DEEPSEEK_BASE_URL` instead of the `OPENAI_*` names above — both are accepted everywhere, including Streamlit Cloud secrets (`OPENAI_*` wins if both are set).
 
 ## Image Requests
 
@@ -148,8 +152,9 @@ Asking the child chat to *see* something ("show me a picture of a flower", "draw
 - **Allowed** requests are cleaned up, styled by age band (`8-10` → cartoon illustration, `11-13` → family-friendly photo, `14-16` → photo), and searched on Unsplash.
 - **Rewritten** requests (a sensitive-but-legitimate topic, e.g. drugs in a school context) never send the original wording to Unsplash — a fixed safe topic is searched instead, without telling the child anything was changed.
 - **Blocked or escalated** requests never trigger a search at all; the child sees the same short refusal used for text-based jailbreak attempts.
-- If Unsplash is configured but the request fails or returns nothing, the child sees "Juni couldn't find that picture. Try asking differently!" with a retry button, rather than a silently substituted, unrelated photo.
-- Every image request — its search term, safety decision, resulting URL, and source (`unsplash` / `picsum` / `placeholder` / `error`) — is logged for the Guardian Command Center, which shows a 📸 icon and a thumbnail preview.
+- If Unsplash is configured but the request fails (bad key, network error) or returns nothing, the child sees "Juni couldn't find that picture. Try asking differently!" with a retry button, rather than a silently substituted, unrelated photo. Requests retry automatically (up to 3 attempts with backoff) for transient failures; a bad key fails fast instead of wasting retries.
+- Unsplash's free Demo tier is capped at 50 requests/hour. Hitting that limit specifically falls back to picsum.photos instead of showing an error — a temporary quota reset isn't something the child can act on, so a real (if unrelated) photo beats a repeated error message.
+- Every image request — its search term, safety decision, resulting URL, and source (`unsplash` / `picsum` / `picsum_rate_limited` / `placeholder` / `error`) — is logged for the Guardian Command Center, which shows a 📸 icon and a thumbnail preview.
 
 ## Sharing the App With Others (Not Just Localhost)
 

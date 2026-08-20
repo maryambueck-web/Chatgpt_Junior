@@ -161,11 +161,17 @@ def _search_image(search_term: str) -> Tuple[Optional[str], str]:
     """Returns (image_url, source). source is one of:
     - "picsum": no UNSPLASH_ACCESS_KEY configured — this is the expected demo
       fallback, not an error, so it fails silently to a real (if unrelated) photo.
+    - "picsum_rate_limited": a key IS configured but Unsplash's free Demo tier
+      (50 requests/hour) is exhausted. This falls back to picsum too, rather
+      than erroring — a quota reset next hour isn't something the child or
+      even the parent can act on, so showing *some* photo beats a repeated
+      "couldn't find that picture" error during a live demo or busy session.
     - "unsplash": a real, content-matched result came back.
-    - "error": a key IS configured but every attempt failed (network error,
-      rate limit, bad key) or returned zero results. This does NOT fall back
-      to picsum — swapping in an unrelated stock photo would hide a real
-      problem from the child. The caller shows a friendly retry message instead.
+    - "error": a key IS configured but every attempt failed for a reason that
+      IS worth surfacing (bad key, network error) or returned zero results.
+      This does not fall back to picsum — swapping in an unrelated stock
+      photo would hide a real, fixable problem. The caller shows a friendly
+      retry message instead.
     """
     access_key = _clean_env("UNSPLASH_ACCESS_KEY")
     if not access_key:
@@ -184,6 +190,16 @@ def _search_image(search_term: str) -> Tuple[Optional[str], str]:
             return None, "error"
         except requests.exceptions.HTTPError as exc:
             status = exc.response.status_code if exc.response is not None else None
+            if status == 429:
+                # An hourly quota won't reset within a few retries, so don't
+                # waste the attempt budget on it — degrade immediately.
+                logger.warning(
+                    "Unsplash rate limit hit (HTTP 429) for %r — the free Demo tier allows "
+                    "50 requests/hour. Falling back to picsum.photos for this request; this "
+                    "resets automatically within the hour.",
+                    search_term,
+                )
+                return _picsum_fallback(search_term), "picsum_rate_limited"
             if status in _NON_RETRYABLE_STATUS_CODES:
                 logger.error(
                     "Unsplash rejected the request with HTTP %s for %r — this usually means "
@@ -194,9 +210,8 @@ def _search_image(search_term: str) -> Tuple[Optional[str], str]:
                 )
                 return None, "error"
             logger.warning(
-                "Unsplash HTTP %s on attempt %d/%d for %r%s",
+                "Unsplash HTTP %s on attempt %d/%d for %r",
                 status, attempt, UNSPLASH_MAX_ATTEMPTS, search_term,
-                " (likely rate-limited — the free Demo tier allows 50 requests/hour)" if status == 429 else "",
             )
         except requests.exceptions.RequestException as exc:
             logger.warning(
