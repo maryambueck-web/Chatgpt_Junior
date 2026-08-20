@@ -1,4 +1,4 @@
-June :) # SafeChatGPT: Protected ChatGPT Web App for Children
+# June :) SafeChatGPT: Protected ChatGPT Web App for Children
 
 SafeChatGPT is a one-week proof-of-concept web app that lets children use ChatGPT in a protected, parent-controlled environment.
 
