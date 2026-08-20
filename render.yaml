@@ -1,0 +1,35 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy: push this repo, then in Render "New +" -> "Blueprint", pick this repo.
+#
+# NOTE: persistent disks require a paid instance type (Starter or above) —
+# Render's free web service tier does not support attached disks, so without
+# `plan: starter` your data will NOT survive redeploys despite this config.
+services:
+  - type: web
+    name: safechatgpt
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: SAFECHATGPT_DB_PATH
+        value: /data/safechatgpt.db
+      - key: OPENAI_MODEL
+        value: deepseek-chat
+      - key: OPENAI_BASE_URL
+        value: https://api.deepseek.com
+      # Secrets: set these in the Render dashboard after the first deploy —
+      # `sync: false` means Render won't expect or overwrite a value from
+      # this file, so a real key is never committed to the repo.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PARENT_PIN
+        sync: false
+      - key: UNSPLASH_ACCESS_KEY
+        sync: false
+      - key: JUNI_PLACEHOLDER_IMAGE_URL
+        sync: false
+    disk:
+      name: safechatgpt-data
+      mountPath: /data
+      sizeGB: 1

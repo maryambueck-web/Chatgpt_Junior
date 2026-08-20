@@ -1,8 +1,20 @@
 import html
 import os
+from datetime import datetime
 
 import streamlit as st
-from shared_store import bridge_secrets_to_env, clear_log, load_log, load_settings, save_settings
+from chatgpt_adapter import get_chatgpt_status
+from image_service import get_unsplash_status
+from shared_store import (
+    bridge_secrets_to_env,
+    clear_log,
+    get_pin_lockout,
+    load_log,
+    load_settings,
+    record_failed_pin_attempt,
+    reset_pin_attempts,
+    save_settings,
+)
 from theme import hide_page_nav, inject_base_styles
 
 st.set_page_config(page_title="SafeChatGPT — Guardian Command Center", page_icon="🛰️", layout="wide")
@@ -36,14 +48,35 @@ if not st.session_state.parent_authenticated:
         """,
         unsafe_allow_html=True,
     )
-    pin_input = st.text_input("Parent PIN", type="password")
-    if st.button("Unlock"):
-        if pin_input == os.getenv("PARENT_PIN", "1234"):
-            st.session_state.parent_authenticated = True
-            st.rerun()
-        else:
-            st.error("Incorrect PIN.")
+    lockout_until = get_pin_lockout()
+    if lockout_until:
+        minutes_left = max(1, int((lockout_until - datetime.now()).total_seconds() // 60) + 1)
+        st.error(f"Too many incorrect PIN attempts. Try again in about {minutes_left} minute(s).")
+    else:
+        pin_input = st.text_input("Parent PIN", type="password")
+        if st.button("Unlock"):
+            if pin_input == os.getenv("PARENT_PIN", "1234"):
+                reset_pin_attempts()
+                st.session_state.parent_authenticated = True
+                st.rerun()
+            else:
+                record_failed_pin_attempt()
+                # The attempt just recorded may be the one that trips the
+                # lockout. Rerun immediately so the top-of-script check picks
+                # it up on a clean render — otherwise the PIN input/button
+                # (already drawn earlier in this same run) would stay visible
+                # alongside the lockout message, which reads as contradictory.
+                if get_pin_lockout():
+                    st.rerun()
+                else:
+                    st.error("Incorrect PIN.")
     st.stop()
+
+if os.getenv("PARENT_PIN", "1234") == "1234":
+    st.warning(
+        "⚠️ You're using the default PIN (1234). Set your own `PARENT_PIN` in `.env` "
+        "(or your deployment's secrets) before letting a child use this for real."
+    )
 
 log = load_log()
 decision_counts = {"ALLOW": 0, "REWRITE": 0, "BLOCK": 0, "ESCALATE": 0}
@@ -195,6 +228,23 @@ if age_band != settings["age_band"]:
 if st.button("Clear safety log"):
     clear_log()
     st.rerun()
+st.markdown("</div>", unsafe_allow_html=True)
+
+# A missing/blank API key produces no error anywhere — just a mock ChatGPT
+# reply or an unrelated picsum.photos photo — so this is the only place that
+# makes a silent misconfiguration visible instead of looking like a bug.
+st.markdown("<div class='sidebar-card'>", unsafe_allow_html=True)
+st.markdown("<div class='sidebar-eyebrow'>🔌 Integration Status</div>", unsafe_allow_html=True)
+chatgpt_status = get_chatgpt_status()
+unsplash_status = get_unsplash_status()
+if chatgpt_status["configured"]:
+    st.success(f"ChatGPT: connected ({chatgpt_status['model']})")
+else:
+    st.warning("ChatGPT: not configured — running in mock mode")
+if unsplash_status["configured"]:
+    st.success(f"Unsplash: connected (key {unsplash_status['preview']})")
+else:
+    st.warning("Unsplash: not configured — images use the picsum.photos fallback (real but unrelated photos)")
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.divider()

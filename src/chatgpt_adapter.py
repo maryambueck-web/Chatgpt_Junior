@@ -7,6 +7,13 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+REQUEST_TIMEOUT_SECONDS = 20.0
+# The OpenAI SDK defaults to 2 automatic retries, so a per-attempt timeout of
+# 20s alone doesn't cap latency at 20s — a slow/erroring endpoint can take up
+# to (retries + 1) * timeout before call_chatgpt returns. Capping retries at 1
+# bounds the real worst case at ~40s instead of a silent ~60s.
+MAX_RETRIES = 1
+
 
 def _mock_chatgpt(messages: List[Dict[str, str]]) -> str:
     user = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
@@ -22,10 +29,34 @@ def _safe_error_message() -> str:
     return "The AI service is temporarily unavailable. I can still help with safe, general learning questions while the connection is restored."
 
 
+def _env(*names: str, default: str = "") -> str:
+    # This app only ever talks to OpenAI-compatible endpoints, so someone
+    # actually using DeepSeek reasonably reaches for DEEPSEEK_* names instead
+    # of OPENAI_* ones in their .env — that's not a mistake, the code should
+    # just accept it. OPENAI_* wins if both happen to be set. Also strips
+    # whitespace: a value pasted into a platform's secrets UI with a trailing
+    # newline is indistinguishable from "wrong credential" once it reaches
+    # the API, and only shows up after deploying, not in local testing.
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value.strip()
+    return default
+
+
+def get_chatgpt_status() -> dict:
+    """Diagnostic info for the Guardian Command Center — never exposes the full key."""
+    api_key = _env("OPENAI_API_KEY", "DEEPSEEK_API_KEY")
+    model = _env("OPENAI_MODEL", "DEEPSEEK_MODEL", default="gpt-4o-mini")
+    if not api_key or api_key == "your_key_here":
+        return {"configured": False, "model": None}
+    return {"configured": True, "model": model}
+
+
 def call_chatgpt(messages: List[Dict[str, str]]) -> str:
-    api_key = os.getenv("OPENAI_API_KEY")
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    base_url = os.getenv("OPENAI_BASE_URL")
+    api_key = _env("OPENAI_API_KEY", "DEEPSEEK_API_KEY")
+    model = _env("OPENAI_MODEL", "DEEPSEEK_MODEL", default="gpt-4o-mini")
+    base_url = _env("OPENAI_BASE_URL", "DEEPSEEK_BASE_URL") or None
 
     if not api_key or api_key == "your_key_here":
         return _mock_chatgpt(messages)
@@ -33,7 +64,7 @@ def call_chatgpt(messages: List[Dict[str, str]]) -> str:
     try:
         from openai import OpenAI
 
-        client_kwargs = {"api_key": api_key}
+        client_kwargs = {"api_key": api_key, "timeout": REQUEST_TIMEOUT_SECONDS, "max_retries": MAX_RETRIES}
         if base_url:
             client_kwargs["base_url"] = base_url
 

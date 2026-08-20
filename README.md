@@ -43,6 +43,54 @@ The system returns one of four decisions:
 - `BLOCK`: do not send or show unsafe content.
 - `ESCALATE`: recommend trusted adult support for serious safety concerns.
 
+## Architecture
+
+```mermaid
+flowchart TD
+    Parent(["👪 Parent"])
+    Child(["🧒 Child"])
+
+    subgraph WebApp["SafeChatGPT — Streamlit App"]
+        ChildView["Child Chat View<br/>app.py"]
+        GuardianView["Guardian Command Center<br/>1_Guardian_Command_Center.py<br/>PIN + lockout gated"]
+        Detect{"Text or image request?"}
+        Safety["Safety Decision Engine<br/>classifier.py + policy_engine.py"]
+        Decision{{"ALLOW · REWRITE<br/>BLOCK · ESCALATE"}}
+        ChatAdapter["chatgpt_adapter.py"]
+        ImageSvc["image_service.py"]
+    end
+
+    DB[("SQLite — shared_store.py<br/>settings · safety log · PIN attempts")]
+    ChatAPI[["ChatGPT / DeepSeek API<br/>(mock fallback if no key)"]]
+    ImgAPI[["Unsplash API<br/>(picsum.photos fallback)"]]
+
+    Child -->|message| ChildView
+    ChildView --> Detect
+    Detect -->|text| Safety
+    Detect -->|image| Safety
+    Safety --> Decision
+
+    Decision -->|BLOCK / ESCALATE| ChildView
+    Decision -->|ALLOW / REWRITE — text| ChatAdapter
+    Decision -->|ALLOW / REWRITE — image| ImageSvc
+
+    ChatAdapter <--> ChatAPI
+    ChatAdapter -->|draft answer, re-checked by Safety| Safety
+    ChatAdapter -->|final answer| ChildView
+
+    ImageSvc <--> ImgAPI
+    ImageSvc -->|image URL or friendly error| ChildView
+
+    Safety -.->|every decision logged| DB
+    ImageSvc -.->|every request logged| DB
+    GuardianView -->|age band, PIN attempts| DB
+    DB -->|alerts, telemetry log| GuardianView
+
+    Parent <-->|PIN-protected| GuardianView
+```
+
+Full component-by-component write-up: [docs/architecture.md](docs/architecture.md).
+
 ## Features in This PoC
 
 - Two separate views: a locked-down **child chat page** (with Juni, an original guardian mascot) and a PIN-protected **Guardian Command Center** for parents.
@@ -59,9 +107,9 @@ The system returns one of four decisions:
 ## Two Views
 
 - **Child view** (`streamlit run src/app.py`, the app's home page): just the chat, greeted by Juni. No parent controls, no visible safety log, no page navigation — the child cannot discover or reach the Guardian Command Center from here.
-- **Guardian Command Center** (`/Guardian_Command_Center` page, reachable only by direct link): protected by a PIN (`PARENT_PIN` in `.env`, defaults to `1234` — change it before any real use). Shows automated alerts for blocked/escalated messages, the child's age-band setting, and the full safety telemetry log.
+- **Guardian Command Center** (`/Guardian_Command_Center` page, reachable only by direct link): protected by a PIN (`PARENT_PIN` in `.env`, defaults to `1234` — change it before any real use, and the dashboard will warn you if you haven't). After 5 incorrect PIN attempts, entry locks for 5 minutes. Shows automated alerts for blocked/escalated messages, the child's age-band setting, and the full safety telemetry log.
 
-Both views read/write shared state under `src/data/` (gitignored), so the Guardian Command Center reflects a child session running in a different browser or on a different device on the same network.
+Both views share state through a SQLite database under `src/data/` (gitignored) by default — see `SAFECHATGPT_DB_PATH` in [Configuration](#configuration) to relocate it — so the Guardian Command Center reflects a child session running in a different browser or on a different device on the same network. The chat is also rate-limited per browser session (15 messages/minute) to protect your API budget from runaway use.
 
 ## Quick Start
 
@@ -91,6 +139,7 @@ Copy `.env.example` to `.env` and fill in what you need. The file is gitignored 
 | `PARENT_PIN` | No | `1234` | PIN for the Guardian Command Center. **Change this before any real use.** |
 | `UNSPLASH_ACCESS_KEY` | No | — | Enables real, content-matched image search. Free at [unsplash.com/developers](https://unsplash.com/developers). Without it, image requests fall back to picsum.photos (a real photo, but not matched to the query). |
 | `JUNI_PLACEHOLDER_IMAGE_URL` | No | a generic guardian avatar | Shown instead of a search result whenever an image request is blocked or escalated. |
+| `SAFECHATGPT_DB_PATH` | No | `src/data/safechatgpt.db` | Where the SQLite database (settings + safety log) lives. Point this at a mounted persistent volume in production — see [Production Deployment](docs/production_deployment.md). |
 
 ## Image Requests
 
@@ -112,6 +161,8 @@ add `UNSPLASH_ACCESS_KEY` too for real image search) under
 **Advanced settings → Secrets**, and deploy. You'll get a permanent public URL.
 Full step-by-step instructions: [docs/project_walkthrough.md](docs/project_walkthrough.md#8b-deploy-so-others-can-use-it-no-localhost-needed).
 
+**Note:** Streamlit Community Cloud's filesystem is ephemeral — the safety log and age-band setting can reset on redeploy. Fine for a demo link; for a deployment you actually rely on, see [Production Deployment](docs/production_deployment.md) for a Docker + persistent-disk setup (Render/Fly.io/Railway) that survives restarts.
+
 ## Presenting the Project
 
 Use the [presentation deck](docs/presentation.md) for a colleague presentation and the [colleague delivery guide](docs/colleague_delivery.md) for the five-minute demo, deployment fields, and verification steps.
@@ -132,8 +183,8 @@ Try these in the app:
 src/
   app.py                     Child chat view (Streamlit home page)
   pages/
-    1_Guardian_Command_Center.py   Parent view: PIN gate, alerts, settings, full log
-  shared_store.py            JSON-backed settings/log shared by both views
+    1_Guardian_Command_Center.py   Parent view: PIN gate + lockout, alerts, settings, full log
+  shared_store.py            SQLite-backed settings/log/PIN-lockout shared by both views
   theme.py                   Shared CSS for both views
   policy_engine.py           Age policy and safety decisions
   classifier.py              Lightweight rule-based classifier
@@ -144,13 +195,19 @@ src/
 tests/
   test_policy_engine.py      Safety decision regression tests
   test_image_service.py      Image request detection and search tests
+  test_shared_store.py       Storage, log ordering, and PIN-lockout tests
 
 docs/
   architecture.md
   threat_model.md
   demo_script.md
   product_pitch.md
+  production_deployment.md  Docker + persistent-disk deployment (Render/Fly.io/Railway)
 
+Dockerfile, .dockerignore   Container image for production deployment
+docker-compose.yml          Local run with a mounted volume, mirrors production storage
+verify.sh                   Builds + runs + exercises the container end to end, checks persistence
+render.yaml, fly.toml, railway.json   Platform-specific deploy configs (see production_deployment.md)
 app-screenshots/             Reference screenshots of both views (see Screenshots above)
 ```
 
@@ -160,4 +217,6 @@ The official ChatGPT website is blocked for the child. SafeChatGPT becomes the o
 
 ## Limitations
 
-This is a proof of concept. A production version would need stronger authentication, tamper-resistant deployment, image moderation beyond a text-based query check (the search term is filtered, not the returned photo's actual pixel content), file/voice input handling, privacy-preserving logs, multilingual classifiers, parental identity verification, jailbreak red-team testing, and legal/compliance review.
+This is a proof of concept, hardened enough to run unattended for one family (see [Production Deployment](docs/production_deployment.md) for concurrency-safe storage, PIN lockout, request timeouts, and rate limiting). It is **not multi-tenant** — one deployment is for one family, sharing one PIN and one settings/log store; supporting many unrelated families on a single URL would need real accounts and per-family data isolation, a much larger project.
+
+Beyond that, a fuller production version would still need: stronger parent authentication than a shared PIN, tamper-resistant deployment, image moderation beyond a text-based query check (the search term is filtered, not the returned photo's actual pixel content), file/voice input handling, privacy-preserving logs, multilingual classifiers, parental identity verification, jailbreak red-team testing, and legal/compliance review.

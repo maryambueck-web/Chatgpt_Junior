@@ -1,0 +1,40 @@
+# Fly.io app config — https://fly.io/docs/reference/configuration/
+#
+# One-time setup before the first `fly deploy`:
+#   fly launch --no-deploy                     # creates the app, skip if already created
+#   fly volumes create safechatgpt_data --size 1 --region iad
+#   fly secrets set OPENAI_API_KEY=... PARENT_PIN=... UNSPLASH_ACCESS_KEY=...
+# Secrets go through `fly secrets`, never in this file — it's committed to the repo.
+
+app = "safechatgpt"
+primary_region = "iad"
+
+[build]
+
+[env]
+  SAFECHATGPT_DB_PATH = "/data/safechatgpt.db"
+  OPENAI_MODEL = "deepseek-chat"
+  OPENAI_BASE_URL = "https://api.deepseek.com"
+
+[mounts]
+  source = "safechatgpt_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8501
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "15s"
+    interval = "30s"
+    method = "get"
+    path = "/_stcore/health"
+    timeout = "5s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

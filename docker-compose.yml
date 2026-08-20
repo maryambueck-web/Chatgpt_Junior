@@ -1,0 +1,37 @@
+services:
+  safechatgpt:
+    build: .
+    # Pinned to arm64 for Apple Silicon. The platform-mismatch warning
+    # ("requested image's platform does not match the detected host
+    # platform") comes from explicitly passing `--platform linux/amd64` on
+    # an arm64 Mac — plain `docker compose up`/`docker build` with no
+    # --platform flag already builds correctly for the host natively; this
+    # line just makes that explicit. Adjust or remove if running on an
+    # Intel/amd64 machine. Has no effect on Render/Fly/Railway — they build
+    # the Dockerfile themselves, independent of this file, on their own
+    # (typically amd64) infrastructure.
+    platform: linux/arm64
+    ports:
+      - "8501:8501"
+    env_file:
+      # Reuses your local .env (OPENAI_API_KEY, PARENT_PIN, UNSPLASH_ACCESS_KEY,
+      # etc.) so this mirrors real usage. .env is gitignored — never bake real
+      # secrets into this file or the image itself.
+      - .env
+    environment:
+      # Overrides whatever (if anything) is in .env, so this compose file
+      # always exercises the persistent-volume path production will use —
+      # this is the local equivalent of a Render/Fly/Railway mounted disk.
+      - SAFECHATGPT_DB_PATH=/data/safechatgpt.db
+    volumes:
+      - safechatgpt_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  safechatgpt_data:

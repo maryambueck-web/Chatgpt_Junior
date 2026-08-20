@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "healthcheckPath": "/_stcore/health",
+    "healthcheckTimeout": 30,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "_comment": "Railway's schema has no first-class volume config. After deploying: add a Volume mounted at /data in the service's Settings tab, then set SAFECHATGPT_DB_PATH=/data/safechatgpt.db plus OPENAI_API_KEY / PARENT_PIN / UNSPLASH_ACCESS_KEY under Variables (not in this file, which is committed to the repo)."
+}

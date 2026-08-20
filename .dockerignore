@@ -1,0 +1,15 @@
+.venv/
+.venv-1/
+__pycache__/
+*.pyc
+.git/
+.pytest_cache/
+src/data/
+app-screenshots/
+docs/
+tests/
+.env
+.env.example
+.devcontainer/
+.github/
+README.md
