@@ -1,4 +1,8 @@
+import sys
+from pathlib import Path
 from unittest.mock import Mock, patch
+
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from image_service import _search_image, is_image_request
 
