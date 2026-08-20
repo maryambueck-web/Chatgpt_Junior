@@ -15,7 +15,14 @@ DEFAULT_SETTINGS = {"age_band": "11-13"}
 # Streamlit Community Cloud stores secrets in st.secrets, not in the process
 # environment, so bridge them into os.environ for the local-dev-style os.getenv()
 # calls elsewhere in the app to pick up.
-ENV_BRIDGE_KEYS = ("OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_BASE_URL", "PARENT_PIN")
+ENV_BRIDGE_KEYS = (
+    "OPENAI_API_KEY",
+    "OPENAI_MODEL",
+    "OPENAI_BASE_URL",
+    "PARENT_PIN",
+    "UNSPLASH_ACCESS_KEY",
+    "JUNI_PLACEHOLDER_IMAGE_URL",
+)
 
 
 def bridge_secrets_to_env() -> None:

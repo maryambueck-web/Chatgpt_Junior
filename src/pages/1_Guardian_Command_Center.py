@@ -123,12 +123,27 @@ if not escalate_entries and not block_entries:
         unsafe_allow_html=True,
     )
 
+def _stage_label(entry: dict) -> str:
+    return f"📸 {entry['stage']}" if entry["stage"] == "Image" else entry["stage"]
+
+
+def _alert_snippet(text: str, limit: int = 220) -> str:
+    # Blocked/escalated "context" can be a multi-paragraph ChatGPT answer. A
+    # blank line inside it ends the surrounding <div>'s HTML block early (per
+    # CommonMark), so every alert-item after it in the list renders as literal
+    # text instead of a styled card — collapsing to one line prevents that.
+    collapsed = " ".join(text.split())
+    if len(collapsed) > limit:
+        collapsed = collapsed[: limit - 1].rstrip() + "…"
+    return collapsed
+
+
 if escalate_entries:
     items = "".join(
         f"""
         <div class="alert-item">
-            <div class="alert-meta">{html.escape(e['timestamp'])} · {html.escape(e['stage'])} · {html.escape(e['category'])}</div>
-            <div class="alert-message">&ldquo;{html.escape(e['context'])}&rdquo;</div>
+            <div class="alert-meta">{html.escape(e['timestamp'])} · {html.escape(_stage_label(e))} · {html.escape(e['category'])}</div>
+            <div class="alert-message">&ldquo;{html.escape(_alert_snippet(e['context']))}&rdquo;</div>
         </div>
         """
         for e in reversed(escalate_entries)
@@ -148,8 +163,8 @@ if block_entries:
     items = "".join(
         f"""
         <div class="alert-item">
-            <div class="alert-meta">{html.escape(e['timestamp'])} · {html.escape(e['stage'])} · {html.escape(e['category'])}</div>
-            <div class="alert-message">&ldquo;{html.escape(e['context'])}&rdquo;</div>
+            <div class="alert-meta">{html.escape(e['timestamp'])} · {html.escape(_stage_label(e))} · {html.escape(e['category'])}</div>
+            <div class="alert-message">&ldquo;{html.escape(_alert_snippet(e['context']))}&rdquo;</div>
         </div>
         """
         for e in reversed(block_entries)
@@ -199,13 +214,20 @@ if log:
             f"<span class='decision-badge' style='color:{style['color']}; background:{style['bg']};'>"
             f"{style['icon']} {html.escape(entry['action'])}</span>"
         )
+        image_url = entry.get("image_url")
+        preview = (
+            f"<img src='{html.escape(image_url)}' alt='' style='width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--line);' />"
+            if image_url
+            else "—"
+        )
         rows += (
             "<tr>"
             f"<td>{html.escape(entry['timestamp'])}</td>"
-            f"<td>{html.escape(entry['stage'])}</td>"
+            f"<td>{html.escape(_stage_label(entry))}</td>"
             f"<td>{badge}</td>"
             f"<td>{html.escape(entry['category'])}</td>"
             f"<td>{html.escape(entry['severity'])}</td>"
+            f"<td>{preview}</td>"
             f"<td>{html.escape(entry['explanation'])}</td>"
             "</tr>"
         )
@@ -220,6 +242,7 @@ if log:
                     <th>Decision</th>
                     <th>Category</th>
                     <th>Severity</th>
+                    <th>Preview</th>
                     <th>Explanation</th>
                 </tr>
             </thead>
