@@ -1,0 +1,47 @@
+name: Safety classification gap
+description: A message was allowed/blocked/rewritten incorrectly by the safety engine
+labels: ["safety", "bug"]
+body:
+  - type: textarea
+    id: input
+    attributes:
+      label: Exact child input (or ChatGPT output) that was misclassified
+      description: Paste the literal text sent to the app.
+    validations:
+      required: true
+  - type: dropdown
+    id: actual
+    attributes:
+      label: Actual decision
+      options:
+        - ALLOW
+        - REWRITE
+        - BLOCK
+        - ESCALATE
+    validations:
+      required: true
+  - type: dropdown
+    id: expected
+    attributes:
+      label: Expected decision
+      options:
+        - ALLOW
+        - REWRITE
+        - BLOCK
+        - ESCALATE
+    validations:
+      required: true
+  - type: input
+    id: ageband
+    attributes:
+      label: Age band used
+      placeholder: "8-10 / 11-13 / 14-16"
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Why this decision is wrong
+      description: Why the actual decision is unsafe or overly restrictive for this age band.
+    validations:
+      required: true

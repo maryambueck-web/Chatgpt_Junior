@@ -6,6 +6,7 @@
 [![Built with Streamlit](https://img.shields.io/badge/built%20with-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
 [![Docker ready](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](Dockerfile)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 An original safety companion who protects the path between a curious child and a helpful AI — so parents never have to choose between "no AI" and "no visibility."
 
@@ -263,14 +264,7 @@ Beyond that, a fuller production version would still need: stronger parent authe
 
 ## Contributing
 
-Issues and pull requests are welcome. Before opening a PR:
-
-```bash
-python -m pytest -q      # safety regression suite must pass
-./verify.sh              # if you touched Docker/deployment/storage code
-```
-
-Please keep the tone of user-facing copy consistent with Juni's voice (calm, warm, never clinical — except crisis/self-harm responses, which stay deliberately plain and serious) and add a regression test for any change to `classifier.py` or `policy_engine.py`.
+Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for setup, the PR checklist, and how to report a safety classification gap. This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md). Found a real security vulnerability (not a classifier miss)? See [SECURITY.md](SECURITY.md) instead of opening a public issue.
 
 ## License
 
